@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates an ECR repository with the permissions needed to push and pull images. It gives any user in the account access.
+Parameters:
+  RepoName:
+    Type: String
+    Default: mwaa-cicd
+    Description: The name of the ECR repository.
+
+Resources:
+  Repository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref RepoName
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowPushPull
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:ListImages"
+              - "ecr:DescribeImages"
+              - "ecr:DescribeRepositories"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
+Outputs:
+  EcrRepoName:
+    Value: !Ref RepoName
+
+  EcrRepositoryUri:
+    Value: !GetAtt Repository.RepositoryUri
